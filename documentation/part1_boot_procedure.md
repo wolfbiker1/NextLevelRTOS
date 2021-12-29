@@ -34,12 +34,6 @@ Therefore we go one step further to  **Chapter 2.3.4 Vector Table**. It may be g
 | 0x0        | Initial Stackpointer Value|
 
 Now we learned that the information, or more precisely, the adress of the reset function is located somewhere with an offset of 0x4.
-
-{% hint style="info" %}
-Memory adresses usually point to a 1 Byte Block, so 0x4 means 4 byte
-respectively 32 Bit. 
-{% endhint %}
-
  
 Another interesting point is the second entry - here we need to tell the cpu, where the stackpointer points to after startup. More on that soon. First we has to clarify, where the exact adress is instead of the offset. Reading further in the manual we obtain this information:
 
@@ -54,9 +48,7 @@ code, whereas the SRAM is used for dynamic stacks or heap memory. If you would p
 so much read- and write operations. 
 
 ![memorysize](assets/01_mem_size.png)
-
-src: https://www.st.com/en/microcontrollers-microprocessors/stm32f303.html#overview,
-accessed on 01/12/21
+[Fig. 1: Memorysize of different Boardrevisions][MemoryOverview]
 
 The actual size depends on the board revision, in our case it is 128kbyte flash and 40kbyte sram memory. The next step is to determine how the cpu adresses this memory, so let's check out the STM32F303 documentation manual. On page 65 we get the following
 entry:
@@ -77,11 +69,6 @@ These are the memory boundaries of the hardwareplatform:
 | Flash        | 128k | 0x0800 0000 | 0x0801 F400 |
 | SRAM         |  40k | 0x0200 0000 | 0x0200 9C40 |
 
-
-{% hint style="info" %}
-Example: How to transform bytes into hex representation
-128 kByte = 128000 Byte => 0x1F400
-{% endhint %}
 
 Now we have enough background to write the first bootup code lines!
 
@@ -112,6 +99,8 @@ pub unsafe extern "C" fn Reset() -> ! {
     main()
 }
 ```
+[Code 1: Reset Function - lib.rs][lib.rs]
+
 
 There are three important things to consider:
 * The function has to be **extern**, otherwise the compiler would delete it from the
@@ -134,6 +123,8 @@ You remember from the last chapter, that the CPU expects a vector table containi
 pub static RESET_VECTOR: unsafe extern "C" fn() -> ! = Reset;
 
 ```
+[Code 2: Vector Table Entry - lib.rs][lib.rs]
+
 
 Here we define the symbol **RESET_VECTOR**, pointing to our created Reset function.
 The unknown line __#[link_section = ".vector_table.reset_vector"]__ defines a section name, which we need later on to place in memory in the linker script. The given name is not mandatory, you can choose whatever is comfortable.
@@ -153,6 +144,8 @@ fn panic(_panic: &PanicInfo<'_>) -> ! {
     loop {}
 }
 ```
+[Code 3: Panic Handler - lib.rs][lib.rs]
+
 
 Add this to cargo.toml to tell rust what to do in case of panic:
 
@@ -165,11 +158,7 @@ panic = "abort"
 panic = "abort"
 ```
 
-{% hint style="info" %}
-Do not simply copy and paste, it may contain invalid Unicode characters!
-{% endhint %}
-
-
+[Code 4: Panic behaviour - cargo.toml][cargo.toml]
 
 To make the buildprocess more comfortable, please add the following code into 
 runtime:
@@ -191,6 +180,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 ```
+
+[Code 5: Build automatisation - build.rs][build.rs]
+
 
 Well done, the rust side from the runtime is almost done! What's left is the linker script and some ram initialization, but you have to be a little bit more patient to get to know that stuff.
 
@@ -214,6 +206,9 @@ pub fn main() -> ! {
 
 ```
 
+[Code 6: Target Function after booting - main.rs][main.rs]
+
+
 This is now main function, which we call in the runtime program. To overcome compile errors, we need to tell the compiler, that we use our 'own' main function by adding #![no_main] to the top of the source code. Before we can check out the first build, we need to reference our runtime crate by adding the following line to the cargo.toml file:
 
 ```toml
@@ -222,7 +217,7 @@ os_kernel/cargo.toml
 runtime = { path = "../runtime"}
 ```
 
-
+[Code 7: Add dependency - cargo.toml][cargo.toml]
 
 From the host side it is now clear what to do - the 'receipe' for the startup procedure is written. But we do not compile for our host system, but for the ARM target. We need to automate this process, so that we are able to type **cargo run** to trigger a crossbuild and flash procedure.
 
@@ -237,6 +232,7 @@ rustflags = ["-C", "link-arg=-Tlink.x"]
 target = "thumbv7em-none-eabihf"
 
 ```
+[Code 8: Build target - config][config]
 
 Also create two files in the given directory:
 ```sh
@@ -254,6 +250,7 @@ source [find interface/stlink-v2-1.cfg]
 
 source [find target/stm32f3x.cfg]
 ```
+[Code 9: ST Link - openocd.cfg][openocd.cfg]
 
 ```
 // os_kernel/openocd.gdb (DO NOT PASTE IN THIS COMMENT IN ORIGINAL FILE)
@@ -264,6 +261,7 @@ load
 continue
 
 ```
+[Code 10: Connect the device to gdb - openocd.gdb][openocd.gdb]
 
 Details are in the chapter **Development environment**.
 
@@ -353,6 +351,7 @@ Now it is time for a first test. Please ensure you are in the directory ``` os_k
 
 ![boot](assets/02_succesfull_boot.png)
 
+[Fig. 2: Successfull booting][successfullBoot]
 
 ## Extensions
 
@@ -415,3 +414,15 @@ src;
 https://jsandler18.github.io/explanations/linker_ld.html
 
 https://docs.rust-embedded.org/embedonomicon/preface.html
+
+[MemoryOverview]: https://www.st.com/en/microcontrollers-microprocessors/stm32f303.html#overview (Memory Overview STM32F3x)
+
+[main.rs]: https://github.com/wolfbiker1/NextLevelRTOS/tree/part1/boot_and_startup/kernel/src/main.rs (Github)
+[lib.rs]: https://github.com/wolfbiker1/NextLevelRTOS/tree/part1/boot_and_startup/runtime/src/lib.rs (Github)
+[build.rs]: https://github.com/wolfbiker1/NextLevelRTOS/tree/part1/boot_and_startup/runtime/build.rs (Github)
+[cargo.toml]: https://github.com/wolfbiker1/NextLevelRTOS/tree/part1/boot_and_startup/runtime/Cargo.toml (Github)
+[config]: https://github.com/wolfbiker1/NextLevelRTOS/tree/part1/boot_and_startup/kernel/.cargo/config (Github)
+[openocd.cfg]: https://github.com/wolfbiker1/NextLevelRTOS/blob/part1/boot_and_startup/kernel/openocd.cfg (Github)
+[openocd.gdb]: https://github.com/wolfbiker1/NextLevelRTOS/blob/part1/boot_and_startup/kernel/openocd.gdb (Github)
+
+[successfullBoot]: assets/02_succesfull_boot.png (Picture)
