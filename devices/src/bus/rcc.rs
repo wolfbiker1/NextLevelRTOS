@@ -16,8 +16,8 @@ pub mod rcc {
     //-------------------------LOCAL-IMPORTS-------------------------//
     //---------------------------------------------------------------//
     // use super::
-    use super::stm32f407ve::bitfields;
     use super::stm32f407ve::adresses;
+    use super::stm32f407ve::bitfields;
 
     use super::primitive_extensions::BitOps;
 
@@ -43,7 +43,7 @@ pub mod rcc {
 
     pub unsafe fn activate_usart1_bus_clock() {
         let rcc_bus = RCC::new(adresses::RCC);
-        (*rcc_bus).apb2enr.set_bit(0b1 << 4); 
+        (*rcc_bus).apb2enr.set_bit(0b1 << 4);
     }
 
     pub unsafe fn activate_dma1_bus_clock() {

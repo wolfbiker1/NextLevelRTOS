@@ -15,8 +15,7 @@ pub mod primitive_extensions {
         fn read_register(&self) -> u32;
     }
 
-    impl BitOps for u32    
-    {
+    impl BitOps for u32 {
         fn get_addr(&self) -> *const u32 {
             unsafe { *core::ptr::addr_of!(self) }
         }

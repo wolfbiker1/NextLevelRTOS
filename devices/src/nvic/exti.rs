@@ -4,8 +4,6 @@
 //! a provided builder.
 //!
 
-
-
 use super::super::bus::rcc;
 use super::super::generic::platform::stm32f407ve::adresses;
 use super::super::generic::traits::primitive_extensions::BitOps;
@@ -16,17 +14,15 @@ use super::super::registerblocks::exti::EXTI;
 //---------------------------------------------------------------//
 pub enum EdgeDetection {
     RisingEdge,
-    FallingEdge
+    FallingEdge,
 }
-
-
 
 //---------------------------------------------------------------//
 //-----------------------STRUCT-DEFINITONS-----------------------//
 //---------------------------------------------------------------//
 pub struct ExtiConfig {
     controller: &'static EXTI,
-    line: u32
+    line: u32,
 }
 
 //---------------------------------------------------------------//
@@ -49,7 +45,7 @@ impl ExtiConfig {
             line: line_number,
         }
     }
-    
+
     pub fn detect_rising_edge(&self) {
         self.controller.rtsr.set_bit(self.line);
     }
@@ -58,6 +54,3 @@ impl ExtiConfig {
         self.controller.ftsr.set_bit(self.line);
     }
 }
-
-
-

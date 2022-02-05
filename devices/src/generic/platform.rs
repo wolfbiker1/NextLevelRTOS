@@ -101,7 +101,6 @@ pub mod stm32f407ve {
             pub const GENERALPURPOSEOUTPUT: u32 = 0b01;
             pub const ALTERNATE: u32 = 0b10;
             pub const ANALOG: u32 = 0b11;
-
         }
         pub mod rcc {
             pub const GPIOPAEN: u32 = 0;

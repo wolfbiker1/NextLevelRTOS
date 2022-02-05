@@ -20,12 +20,18 @@ pub fn init_systick(period_ms: u32) {
 
 pub fn enable_systick() {
     unsafe {
-        core::ptr::write_volatile(STK as *mut u32, core::ptr::read_volatile(STK as *const u32) | 0b1);
+        core::ptr::write_volatile(
+            STK as *mut u32,
+            core::ptr::read_volatile(STK as *const u32) | 0b1,
+        );
     }
 }
 
 pub fn disable_systick() {
     unsafe {
-        core::ptr::write_volatile(STK as *mut u32, core::ptr::read_volatile(STK as *const u32) & !0b1);
-    }  
+        core::ptr::write_volatile(
+            STK as *mut u32,
+            core::ptr::read_volatile(STK as *const u32) & !0b1,
+        );
+    }
 }

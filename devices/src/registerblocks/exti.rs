@@ -15,7 +15,7 @@ pub struct EXTI {
 //---------------------STRUCT-IMPLEMENTATIONS--------------------//
 //---------------------------------------------------------------//
 impl EXTI {
-   pub fn new(exti_base_adress: u32) -> &'static EXTI {
+    pub fn new(exti_base_adress: u32) -> &'static EXTI {
         unsafe { &mut *(exti_base_adress as *mut EXTI) }
     }
 }

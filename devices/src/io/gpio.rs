@@ -12,10 +12,10 @@ pub mod gpio {
     //---------------------------------------------------------------//
     //----------------------------IMPORTS----------------------------//
     //---------------------------------------------------------------//
+    use super::primitive_extensions::BitOps;
     use super::rcc;
     use super::stm32f407ve::adresses;
     use super::stm32f407ve::bitfields;
-    use super::primitive_extensions::BitOps;
     use super::GPIO;
 
     //---------------------------------------------------------------//

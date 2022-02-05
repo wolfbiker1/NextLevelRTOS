@@ -104,7 +104,6 @@ pub mod dma {
             self.device.dynamic.ccrx.set_bit(0b1 << 4);
             // when reading from memory, increment ptr also! (MINC)
             self.device.dynamic.ccrx.set_bit(0b1 << 7);
-
         }
 
         // addr to read from
