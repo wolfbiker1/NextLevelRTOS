@@ -91,6 +91,8 @@ pub mod stm32f407ve {
         // manual page 55
         pub const RCC: u32 = 0x4002_3800;
         pub const USART1_BASEADRESS: u32 = 0x4001_1000;
+        // manual page 66
+        pub const EXTI: u32 = 0x4001_3C00;
     }
 
     pub mod bitfields {

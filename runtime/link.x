@@ -29,6 +29,7 @@ into two symbol names because of their return type. See lib.rs
 for more info. */
 EXTERN(RESET);
 EXTERN(EXCEPTIONS);
+EXTERN(NVIC);
 
 /* Description of what the memory contains and how it will be located . */
 SECTIONS
@@ -44,7 +45,9 @@ SECTIONS
     KEEP(*(.vector_table.reset));
 
     /* Entry 2: Any other exception handlers. */
-    KEEP(*(.vector_table.exceptions));
+    KEEP(*(.vector_table.exceptions))
+
+    KEEP(*(.vector_table.nvic))
   } > FLASH
   .text :
   {
