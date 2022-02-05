@@ -52,12 +52,10 @@ pub union VectorDivergentFn {
     handler: unsafe extern "C" fn() -> !,
 }
 
-
 extern "C" {
     fn SysTick();
     fn SVCall();
 }
-
 
 ///
 /// Manually create a section with points to the adress of
@@ -70,29 +68,28 @@ pub static RESET: [VectorDivergentFn; 1] = [VectorDivergentFn { handler: Reset }
 #[link_section = ".vector_table.exceptions"]
 #[no_mangle]
 pub static EXCEPTIONS: [Vector; 14] = [
-    Vector { reserved: 0 }, // NMI
-    Vector { reserved: 0 }, // Hardfault
-    Vector { reserved: 0 }, // MM Fault
-    Vector { reserved: 0 }, // Bus fault
-    Vector { reserved: 0 }, // Usage fault
-    Vector { reserved: 0 }, // ...
-    Vector { reserved: 0 }, // Reserved
-    Vector { reserved: 0 }, // ...
-    Vector { reserved: 0 }, // ...
-    Vector { handler: SVCall }, // SVCall
-    Vector { reserved: 0 }, // Debug
-    Vector { reserved: 0 }, // Reserved
-    Vector { reserved: 0 }, // PendSV
+    Vector { reserved: 0 },      // NMI
+    Vector { reserved: 0 },      // Hardfault
+    Vector { reserved: 0 },      // MM Fault
+    Vector { reserved: 0 },      // Bus fault
+    Vector { reserved: 0 },      // Usage fault
+    Vector { reserved: 0 },      // ...
+    Vector { reserved: 0 },      // Reserved
+    Vector { reserved: 0 },      // ...
+    Vector { reserved: 0 },      // ...
+    Vector { handler: SVCall },  // SVCall
+    Vector { reserved: 0 },      // Debug
+    Vector { reserved: 0 },      // Reserved
+    Vector { reserved: 0 },      // PendSV
     Vector { handler: SysTick }, // SysTick 0x3C
 ];
-
 
 #[link_section = ".vector_table.nvic"]
 #[no_mangle]
 pub static NVIC: [Vector; 11] = [
     Vector { reserved: 0 }, // Watchdog
-    Vector { reserved: 0 }, // PVD 
-    Vector { reserved: 0 }, // TAMP_STAMP 
+    Vector { reserved: 0 }, // PVD
+    Vector { reserved: 0 }, // TAMP_STAMP
     Vector { reserved: 0 }, // RTC_WKUP
     Vector { reserved: 0 }, // Flash
     Vector { reserved: 0 }, // RCC

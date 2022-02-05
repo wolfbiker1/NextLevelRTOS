@@ -12,7 +12,9 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // put `link.x` in the build directory
     File::create(out_dir.join("link.x"))?.write_all(include_bytes!("link.x"))?;
-    Build::new().file("../kernel/src/asm/context_mng.s").compile("asm");
+    Build::new()
+        .file("../kernel/src/asm/context_mng.s")
+        .compile("asm");
     println!("cargo:rerun-if-changed=asm.s");
     Ok(())
 }
