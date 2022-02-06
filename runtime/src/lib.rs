@@ -88,21 +88,21 @@ pub static EXCEPTIONS: [Vector; 14] = [
 #[link_section = ".vector_table.nvic"]
 #[no_mangle]
 pub static NVIC: [Vector; 11] = [
-    Vector { reserved: 0 }, // Watchdog
-    Vector { reserved: 0 }, // PVD
-    Vector { reserved: 0 }, // TAMP_STAMP
-    Vector { reserved: 0 }, // RTC_WKUP
-    Vector { reserved: 0 }, // Flash
-    Vector { reserved: 0 }, // RCC
-    Vector { reserved: 0 }, // EXTI0
+    Vector { handler: Ext1Int }, // Watchdog
+    Vector { handler: Ext1Int }, // PVD
+    Vector { handler: Ext1Int }, // TAMP_STAMP
+    Vector { handler: Ext1Int }, // RTC_WKUP
+    Vector { handler: Ext1Int }, // Flash
+    Vector { handler: Ext1Int }, // RCC
+    Vector { handler: Ext1Int }, // EXTI0
     Vector { handler: Ext1Int }, // EXTI1
-    Vector { reserved: 0 }, // EXTI2
-    Vector { reserved: 0 }, // EXTI3
-    Vector { reserved: 0 }, // EXTI4
-];
-
-//-----------------------------------------------------------------//
-//------------------------EXCEPTION-HANDLER------------------------//
+    Vector { handler: Ext1Int }, // EXTI2
+    Vector { handler: Ext1Int }, // EXTI3
+    Vector { handler: Ext1Int } , // EXTI4
+];            
+              
+//----------- ------------------------------------------------------//
+//----------- -------------EXCEPTION-HANDLER------------------------//
 //-----------------------------------------------------------------//
 #[panic_handler]
 fn panic(_panic: &PanicInfo<'_>) -> ! {

@@ -40,9 +40,14 @@ fn led_off() {
 fn led_on() {
     loop {
         unsafe {
-            let mut reg_content = core::ptr::read_volatile(0x4002_0014 as *mut u32);
-            reg_content |= (0b1_u32) << 2;
-            core::ptr::write_volatile(0x4002_0014 as *mut u32, reg_content);
+            let mut reg_content = core::ptr::read_volatile(0x4002_0010 as *mut u32);
+            reg_content &= !(0xFFFD);
+            reg_content >>= 1;
+            if reg_content == 0 {
+                "is on..".println();
+            } else if reg_content == 1 {
+                "is off".println();
+            }
         }
     }
 }
@@ -68,10 +73,10 @@ fn user_init() {
         sched::destroy as *const () as u32,
     )
     .unwrap();
-    "spawn process 1".println();
-    sched::spawn(calculate_fibonacci, "calculate_fibonacci");
-    "spawn process 2".println();
-    sched::spawn(led_off, "led_off");
+    //"spawn process 1".println();
+    //sched::spawn(calculate_fibonacci, "calculate_fibonacci");
+    //"spawn process 2".println();
+    //sched::spawn(led_off, "led_off");
     "spawn process 3".println();
     sched::spawn(led_on, "led_on");
     loop {
@@ -104,7 +109,7 @@ pub unsafe fn kernel_init() -> ! {
         .as_push_pull()
         .as_af(7);
 
-    GpioDevice::new("A", 1).as_input().as_pull_up();
+    GpioDevice::new("A", 1).as_input().as_pull_down();
 
     let usart = devices::controller::uart::usart::UsartDevice::new(9600);
     usart.enable();
@@ -113,7 +118,7 @@ pub unsafe fn kernel_init() -> ! {
         process::new_process(user_init as *const () as u32, user_init as *const () as u32).unwrap();
 
     let exti = exti::ExtiConfig::new(1);
-    exti.detect_falling_edge().enable_interrupt();
+    exti.detect_falling_edge().detect_rising_edge().enable_interrupt();
     "hello from trait".println();
     "usart works without errors...".println();
     sched::spawn(early_user_land, "early_user_land");

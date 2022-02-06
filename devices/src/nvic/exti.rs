@@ -47,7 +47,7 @@ impl ExtiConfig {
     }
 
     pub fn enable_interrupt(self) -> Self {
-        self.controller.imr.set_bit(self.line);
+        self.controller.imr.set_bit(1 << self.line);
         self
     }
 
@@ -57,12 +57,12 @@ impl ExtiConfig {
     }
 
     pub fn detect_rising_edge(self) -> Self {
-        self.controller.rtsr.set_bit(self.line);
+        self.controller.rtsr.set_bit(1 << self.line);
         self
     }
 
     pub fn detect_falling_edge(self) -> Self {
-        self.controller.ftsr.set_bit(self.line);
+        self.controller.ftsr.set_bit(1 << self.line);
         self
     }
 }
