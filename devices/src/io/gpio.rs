@@ -203,6 +203,11 @@ pub mod gpio {
     #[no_mangle]
     pub extern "C" fn Ext1Int() {
         unsafe {
+            // clear pending bit
+            core::ptr::write_volatile(
+                0x4001_3C14 as *mut u32,
+                core::ptr::read_volatile(0x4001_3C14 as *const u32) | 0b10,
+            );
             asm!("bkpt");
         }
     }

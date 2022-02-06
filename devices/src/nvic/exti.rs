@@ -40,6 +40,7 @@ impl ExtiConfig {
     /// * `ExtiConfig Struct Object`
     ///
     pub unsafe fn new(line_number: u32) -> ExtiConfig {
+        rcc::rcc::activate_syscfgen_clock();
         ExtiConfig {
             controller: EXTI::new(adresses::EXTI),
             line: line_number,
@@ -52,7 +53,7 @@ impl ExtiConfig {
     }
 
     pub fn disable_interrupt(self) -> Self {
-        self.controller.imr.clear_bit(self.line);
+        self.controller.imr.clear_bit(1 << self.line);
         self
     }
 
@@ -61,8 +62,18 @@ impl ExtiConfig {
         self
     }
 
+    pub fn ignore_rising_edge(self) -> Self {
+        self.controller.rtsr.clear_bit(1 << self.line);
+        self
+    }
+
     pub fn detect_falling_edge(self) -> Self {
         self.controller.ftsr.set_bit(1 << self.line);
+        self
+    }
+
+    pub fn ignore_falling_edge(self) -> Self {
+        self.controller.ftsr.clear_bit(1 << self.line);
         self
     }
 }

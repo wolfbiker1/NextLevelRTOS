@@ -46,7 +46,7 @@ fn led_on() {
             if reg_content == 0 {
                 "is on..".println();
             } else if reg_content == 1 {
-                "is off".println();
+                "is off..".println();
             }
         }
     }
@@ -118,7 +118,11 @@ pub unsafe fn kernel_init() -> ! {
         process::new_process(user_init as *const () as u32, user_init as *const () as u32).unwrap();
 
     let exti = exti::ExtiConfig::new(1);
-    exti.detect_falling_edge().detect_rising_edge().enable_interrupt();
+    exti.detect_rising_edge().enable_interrupt();
+
+    // enable nvic irq #7
+    core::ptr::write_volatile(0xE000E100 as *mut u32, 0b1 << 7);
+
     "hello from trait".println();
     "usart works without errors...".println();
     sched::spawn(early_user_land, "early_user_land");

@@ -5,7 +5,7 @@ extern crate cpu;
 //---------------------------------------------------------------//
 #[repr(C)]
 pub struct Frame {
-    buffer: [u32; 256],/* core::alloc::Layout */
+    buffer: [u32; 256], /* core::alloc::Layout */
     initialized_core_registers: cpu::core::CoreRegister,
 }
 

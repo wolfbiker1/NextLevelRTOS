@@ -41,6 +41,16 @@ pub mod rcc {
         };
     }
 
+    pub unsafe fn activate_syscfgen_clock() {
+        let rcc_bus = RCC::new(adresses::RCC);
+        (*rcc_bus).apb2enr.set_bit(0b1 << 14);
+    }
+
+    pub unsafe fn reset_syscfgen_clock() {
+        let rcc_bus = RCC::new(adresses::RCC);
+        (*rcc_bus).apb2rstr.set_bit(0b1 << 14);
+    }
+
     pub unsafe fn activate_usart1_bus_clock() {
         let rcc_bus = RCC::new(adresses::RCC);
         (*rcc_bus).apb2enr.set_bit(0b1 << 4);
