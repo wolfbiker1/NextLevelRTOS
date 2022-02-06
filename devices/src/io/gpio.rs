@@ -26,6 +26,12 @@ pub mod gpio {
         OpenDrain,
     }
 
+    pub enum InputTypes {
+        Nothing,
+        PullUp,
+        PullDown,
+    }
+
     pub enum ModerTypes {
         InputMode,
         GeneralPurposeOutputMode,
@@ -91,6 +97,14 @@ pub mod gpio {
             self
         }
 
+        pub fn as_pull_up(self) -> GpioDevice {
+            self.set_pupdr(InputTypes::PullUp);
+            self
+        }
+        pub fn as_pull_down(self) -> GpioDevice {
+            self.set_pupdr(InputTypes::PullDown);
+            self
+        }
         pub fn as_push_pull(self) -> GpioDevice {
             self.set_otyper(OutputTypes::PushPull);
             self
@@ -139,6 +153,20 @@ pub mod gpio {
             };
         }
 
+        fn set_pupdr(&self, pupdr_type: InputTypes) {
+            match pupdr_type {
+                InputTypes::PullUp => {
+                    self.port.pupdr.set_bit((0b01 as u32) << self.pin);
+                }
+                InputTypes::PullDown => {
+                    self.port.pupdr.set_bit((0b10 as u32) << self.pin);
+                }
+                InputTypes::Nothing => {
+                    self.port.pupdr.set_bit((0b00 as u32) << self.pin);
+                }
+            }
+        }
+
         // 11.4.6 GPIO port output data register (GPIOx_ODR) (x = A..H)
         fn set_odr(&self, odr_type: OutputState) {
             match odr_type {
@@ -170,18 +198,12 @@ pub mod gpio {
                 self.port.afrh.clear_bit((0xF as u32) << pin * 4);
                 self.port.afrh.set_bit(af_number << pin * 4);
             };
-            // unsafe {
-            //     ptr::write_volatile(
-            //         alternate_function_register as *mut u32,
-            //         ptr::read_volatile(alternate_function_register as *const u32)
-            //             & !(0xF as u32) << pin * 4,
-            //     );
-            //     ptr::write_volatile(
-            //         alternate_function_register as *mut u32,
-            //         ptr::read_volatile(alternate_function_register as *const u32)
-            //             | af_number << pin * 4,
-            //     );
-            // }
+        }
+    }
+    #[no_mangle]
+    pub extern "C" fn Ext1Int() {
+        unsafe {
+            asm!("bkpt");
         }
     }
 }

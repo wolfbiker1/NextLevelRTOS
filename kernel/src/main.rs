@@ -15,6 +15,8 @@ mod proc;
 use devices::controller::uart::iostream;
 use devices::generic::platform::stm32f407ve::adresses;
 use devices::io::gpio::gpio::GpioDevice;
+use devices::nvic::exti;
+
 use proc::sched;
 
 fn fibonacci(n: u32) -> u32 {
@@ -102,12 +104,16 @@ pub unsafe fn kernel_init() -> ! {
         .as_push_pull()
         .as_af(7);
 
+    GpioDevice::new("A", 1).as_input().as_pull_up();
+
     let usart = devices::controller::uart::usart::UsartDevice::new(9600);
     usart.enable();
 
     let early_user_land =
         process::new_process(user_init as *const () as u32, user_init as *const () as u32).unwrap();
 
+    let exti = exti::ExtiConfig::new(1);
+    exti.detect_falling_edge().enable_interrupt();
     "hello from trait".println();
     "usart works without errors...".println();
     sched::spawn(early_user_land, "early_user_land");

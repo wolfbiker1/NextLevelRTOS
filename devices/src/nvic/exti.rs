@@ -46,11 +46,23 @@ impl ExtiConfig {
         }
     }
 
-    pub fn detect_rising_edge(&self) {
-        self.controller.rtsr.set_bit(self.line);
+    pub fn enable_interrupt(self) -> Self {
+        self.controller.imr.set_bit(self.line);
+        self
     }
 
-    pub fn detect_falling_edge(&self) {
+    pub fn disable_interrupt(self) -> Self {
+        self.controller.imr.clear_bit(self.line);
+        self
+    }
+
+    pub fn detect_rising_edge(self) -> Self {
+        self.controller.rtsr.set_bit(self.line);
+        self
+    }
+
+    pub fn detect_falling_edge(self) -> Self {
         self.controller.ftsr.set_bit(self.line);
+        self
     }
 }

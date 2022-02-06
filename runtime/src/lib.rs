@@ -54,6 +54,7 @@ pub union VectorDivergentFn {
 
 extern "C" {
     fn SysTick();
+    fn Ext1Int();
     fn SVCall();
 }
 
@@ -94,7 +95,7 @@ pub static NVIC: [Vector; 11] = [
     Vector { reserved: 0 }, // Flash
     Vector { reserved: 0 }, // RCC
     Vector { reserved: 0 }, // EXTI0
-    Vector { reserved: 0 }, // EXTI1
+    Vector { handler: Ext1Int }, // EXTI1
     Vector { reserved: 0 }, // EXTI2
     Vector { reserved: 0 }, // EXTI3
     Vector { reserved: 0 }, // EXTI4
