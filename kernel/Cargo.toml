@@ -8,4 +8,4 @@ edition = "2018"
 [dependencies]
 runtime = { path = "../runtime"}
 devices = { path = "../devices"}
-process = { path = "../process"}
+cpu = { path = "../cpu"}

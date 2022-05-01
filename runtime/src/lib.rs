@@ -71,7 +71,7 @@ pub static RESET: [VectorDivergentFn; 1] = [VectorDivergentFn { handler: Reset }
 #[no_mangle]
 pub static EXCEPTIONS: [Vector; 15] = [
     Vector { reserved: 0 },
-    Vector { reserved: 0 },
+    Vector { handler: HardFault },
     Vector { reserved: 0 },
     Vector { reserved: 0 },
     Vector { reserved: 0 },
@@ -95,5 +95,11 @@ pub static EXCEPTIONS: [Vector; 15] = [
 
 #[panic_handler]
 fn panic(_panic: &PanicInfo<'_>) -> ! {
+    loop {}
+}
+
+/// Exceptions that have not been assigned a handler by the end user will make use of this default handler.
+#[no_mangle]
+pub extern "C" fn HardFault() {
     loop {}
 }

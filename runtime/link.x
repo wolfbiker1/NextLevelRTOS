@@ -11,8 +11,8 @@ MEMORY
   TCBMETA (rwx) : ORIGIN = 0x20000000, LENGTH = 4
   TCBPTR (rwx) : ORIGIN = 0x20000004, LENGTH = 32
   TCBBLK (rwx) : ORIGIN = 0x20000024, LENGTH = 32
-  MEM (rwx) : ORIGIN = 0x20000044, LENGTH = 187
-  SRAM (rwx) : ORIGIN = 0x200000FF, LENGTH = 39745
+  MEM (rwx) : ORIGIN = 0x20000044, LENGTH = 4027
+  SRAM (rwx) : ORIGIN = 0x20000FFF, LENGTH = 33745
 }
 
 /* The Entry section expects the symbol name of the first executable 

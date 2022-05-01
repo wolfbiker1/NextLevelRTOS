@@ -12,14 +12,27 @@ pub unsafe fn init() {
     volatile_store(JOURNAL_NUM_OF_ELEMENTS as *mut u32, 0x0000_0000);
 }
 
-pub unsafe fn get_mem(requested_size: u32) -> u32 {
+pub unsafe fn get_mem(mut requested_size: u32) -> u32 {
+
+    // let m = volatile_load(MEM_BLOCK_START as *const u32);
+    while requested_size % 4 != 0 {
+        requested_size += 1
+    }
+    // if m >= 0x20000300 {
+    //     // let x = 3;
+    //     return 0;
+    // }
     let mut no_gap_found = true;
     if volatile_load(JOURNAL_NUM_OF_ELEMENTS as *const u32) != 0 {
         // first fit algorithm
         let entries = volatile_load(JOURNAL_NUM_OF_ELEMENTS as *const u32);
+        // if entries > 15 {
+        //     let b = 12;
+        // }
         for journal_entry in 0..entries {
             let journal_entry_addr = JOURNAL_START + journal_entry * WORD;
             let free_entry = volatile_load(journal_entry_addr as *const u32);
+            // filter dirty bit?
             let size_available = volatile_load(free_entry as *const u32);
             if requested_size <= size_available {
                 volatile_store(journal_entry_addr as *mut u32, 0x0000_0000);
@@ -36,7 +49,7 @@ pub unsafe fn get_mem(requested_size: u32) -> u32 {
                     JOURNAL_NUM_OF_ELEMENTS as *mut u32,
                     volatile_load(JOURNAL_NUM_OF_ELEMENTS as *const u32) - 1,
                 );
-                volatile_store(free_entry as *mut u32, requested_size);
+                volatile_store(free_entry as *mut u32, requested_size | 0x8000_0000);
                 return free_entry + WORD;
             }
         }
@@ -44,9 +57,17 @@ pub unsafe fn get_mem(requested_size: u32) -> u32 {
     }
 
     if volatile_load(JOURNAL_NUM_OF_ELEMENTS as *const u32) == 0 || no_gap_found {
-        let ahf = volatile_load(MEM_BLOCK_START as *const u32);
-        let chunk_start = ahf + WORD;
-        volatile_store(ahf as *mut u32, requested_size);
+        // CRASH
+        let meta_of_new_chunk = volatile_load(MEM_BLOCK_START as *const u32);
+        // let ahf = core::ptr::read_volatile(MEM_BLOCK_START as *const u32);
+
+        // first 4 byte containing size of the chunk
+        let chunk_start = meta_of_new_chunk + WORD;
+
+        // 0x8000_0000 ...set dirty bit
+        volatile_store(meta_of_new_chunk as *mut u32, requested_size | 0x8000_0000);
+
+        // save adress of next free region 
         volatile_store(MEM_BLOCK_START as *mut u32, chunk_start + requested_size);
         return chunk_start;
     }
@@ -55,11 +76,12 @@ pub unsafe fn get_mem(requested_size: u32) -> u32 {
 
 pub fn free(addr: u32) {
     unsafe {
-        volatile_store(
-            (addr - WORD) as *mut u32,
-            volatile_load((addr - 0x4) as *const u32),
-        );
+        // on free, one more gap arises
         let num_of_journal_entries = volatile_load(JOURNAL_NUM_OF_ELEMENTS as *mut u32);
+
+        // stores size & dirty bit
+        let mut chunk_meta = volatile_load((addr - WORD) as *mut u32);
+        chunk_meta &= !(0x8000_0000);
 
         volatile_store(
             JOURNAL_NUM_OF_ELEMENTS as *mut u32,
@@ -69,5 +91,11 @@ pub fn free(addr: u32) {
             (JOURNAL_START + num_of_journal_entries * WORD) as *mut u32,
             addr - WORD,
         );
+        let a: u32 = 0;
+        volatile_store(
+            (addr - WORD) as *mut u32,
+            chunk_meta,
+        );
+        let b: u32 = 0;
     }
 }

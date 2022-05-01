@@ -2,9 +2,9 @@
 //----------------------------IMPORTS----------------------------//
 //---------------------------------------------------------------//
 use super::super::data::list::List;
+use super::super::mem;
 use super::task;
-use process::blueprint::Frame;
-
+use devices::controller::uart::iostream;
 static mut RUNNABLE_TASKS: u32 = 0;
 static mut SLEEPING_TASKS: u32 = 0;
 
@@ -75,13 +75,36 @@ pub fn start_init_process() {
     }
 }
 
-pub fn spawn(p: Frame, name: &str) {
-    // unwrap task list which contains tcb's of runnable tasks
-    let list = unsafe { &mut *(RUNNABLE_TASKS as *mut List) };
-    let r4 = p.get_r4_location();
-    let pid = list.get_size();
-    let tcb = task::create(r4, pid, name);
-    list.insert(tcb);
+
+pub fn spawn_task(function: u32, name: &str, buffer: u32) {
+    unsafe {
+        let list = &mut *(RUNNABLE_TASKS as *mut List);
+
+        let task_address_space =
+            mem::malloc::get_mem(core::mem::size_of::<cpu::core::CoreRegister>() as u32 + buffer);
+        
+        // alloc failed
+        if task_address_space == 0 {
+            let m = 3;
+            return;
+        }
+        let cr = &mut *(((task_address_space + buffer)
+            - core::mem::size_of::<cpu::core::CoreRegister>() as u32)
+            as *mut cpu::core::CoreRegister);
+        cr.r4 = 0x123;
+        cr.pc = function;
+        cr.lr = destroy as *const () as u32;
+        cr.psr = 0x21000000;
+
+        let pid = list.get_size();
+
+        let tcb = task::create(core::ptr::addr_of!(cr.r4) as u32, pid, name);
+        list.insert(tcb);
+    }
+}
+
+pub fn yield_task() {
+    context_switch();
 }
 
 pub fn context_switch() {
@@ -90,14 +113,14 @@ pub fn context_switch() {
         let list = &mut *(RUNNABLE_TASKS as *mut List);
         list.update_tcb(old_sp);
         let sp = list.get_next_sp();
-
+        let size = list.get_size();
         __load_process_context(sp);
     }
 }
 
 #[no_mangle]
 pub extern "C" fn SysTick() {
-    context_switch();
+   context_switch();
 }
 
 #[no_mangle]
